@@ -36,10 +36,35 @@ class View:
         self.txt_titolo = ft.Text(value="Biblioteche di Torino", size=38, weight=ft.FontWeight.BOLD)
 
         # --- Sezione 2: Filtraggio ---
-        # TODO
-
+        # Menu a tendina per la biblioteca. Parte vuoto: le voci le aggiunge il controller
+        # (popola_dropdown) dopo aver letto i dati dal database.
+        # on_select = funzione chiamata quando scelgo una voce.
+        self.dd_biblioteca = ft.Dropdown(
+            label="Biblioteca",
+            width=300,
+            options=[],
+            on_select=self.on_select_biblioteca,
+        )
+        # Menu a tendina per il genere, stessa logica del precedente.
+        self.dd_genere = ft.Dropdown(
+            label="Genere",
+            width=300,
+            options=[],
+            on_select=self.on_select_genere,
+        )
         # Sezione 3: Libri
-        # TODO
+        # Pulsante che avvia la ricerca. on_click = funzione chiamata al clic.
+        self.btn_mostra_libri = ft.Button(
+            content="Mostra Libri",
+            on_click=self.on_click_mostra_libri,
+        )
+        # Contenitore che il controller riempie con una riga di testo per ogni libro trovato.
+        # L'altezza fissa serve perché la pagina ha già lo scroll.
+        self.lv_libri = ft.ListView(
+            height=400,
+            spacing=5,
+            padding=10,
+        )
 
         # --- Toggle Tema ---
         self.toggle_cambia_tema = ft.Switch(label="Tema scuro", value=True, on_change=self.cambia_tema)
@@ -52,15 +77,36 @@ class View:
             self.txt_titolo,
             ft.Divider(),
 
-            # Sezione 2: Filtraggio
-            # TODO
+            # Sezione 2: i due dropdown affiancati e centrati
+            ft.Row(
+                [self.dd_biblioteca, self.dd_genere],
+                alignment=ft.MainAxisAlignment.CENTER,
+            ),
+            ft.Divider(),
 
-            # Sezione 3: Libri
-            # TODO
+            # Sezione 3: pulsante centrato e, sotto, la lista dei libri
+            ft.Row([self.btn_mostra_libri], alignment=ft.MainAxisAlignment.CENTER),
+            self.lv_libri,
         )
 
         self.page.scroll = "adaptive"
         self.page.update()
+
+        # Solo ora che i controlli esistono, chiedo al controller di riempire i dropdown
+        # con i dati del database.
+        if self.controller is not None:
+            self.controller.popola_dropdown()
+
+     # --- Callback verso il controller ---
+    # La view non decide nulla: passa l'evento al controller (principio MVC).
+    def on_select_biblioteca(self, e):
+        self.controller.handle_biblioteca_selezionata(e)
+
+    def on_select_genere(self, e):
+        self.controller.handle_genere_selezionato(e)
+
+    def on_click_mostra_libri(self, e):
+        self.controller.handle_mostra_libri(e)
 
     def cambia_tema(self, e):
         """ Cambia tema scuro/chiaro """
